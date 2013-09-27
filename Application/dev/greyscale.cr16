@@ -1,0 +1,83 @@
+//16 pixels become 1 pixel (merging 4x4 pixel block)
+
+main:
+	movi 0, $r1		
+loop:
+	load $r3 , $r1
+	mov $r3 , $r4
+	srli 8, $r3		// left pixel
+	andi 0x0FF, $r4 // right pixel
+	
+	// left pixel work
+	mov $r3, $r11
+	srli 5, $r11 // red
+	mov $r3, $r12
+	srli 2, $r12 // green
+	andi 7,  $r12 // mask green
+	mov $r3, $r13
+	andi 3,  $r13
+
+	add $r11, $r12
+	add $r12, $r13
+	mov $r13, $r3
+	slli 2,  $r13   // multiply by 4
+	add $r13, $r3   // add 1
+	srli 4, $r3     // x/16
+
+	// split average for color
+//	cmpi 0x7, $r3
+//	blt else
+//	mov 0x7, $r3
+//else:
+//	and 0x7, $r3
+//	mov $r3, $r13
+//	slli 5,  $r13
+//	or  $r3, $r13
+//	andi -2, $r3
+//	slli 2, $r3
+//	or  $r13, $r3
+
+	// right pixel work
+	mov $r4, $r11
+	srli 5, $r11 // red
+	mov $r4, $r12
+	srli 2, $r12 // green
+	andi 7,  $r12 // mask green
+	mov $r4, $r13
+	andi 3,  $r13
+
+	add $r11, $r12
+	add $r12, $r13
+	mov $r13, $r4
+	slli 2,  $r4   // multiply by 4
+	add $r13, $r4  // add 1
+	srli 4, $r4    // x/16
+
+//	// split values
+//	cmpi 0x7, $r4
+//	blt else1
+//	movi 0x7, $r4
+//else1:
+//	andi 0x7, $r4
+//	mov $r4, $r13
+//	slli 5,  $r13
+//	or  $r4, $r13
+//	andi -2, $r4
+//	slli 2, $r4
+//	or  $r13, $r4
+
+	// load pixels together
+	slli 8, $r3
+	or $r3, $r4
+	xori -1, $r4 
+	stor $r4, $r1 
+	addi 1, $r1
+
+	cmpi 153600, $r1
+	bne loop
+	movi 0xAA, $r9
+	movi 0x800004, $r8
+	stor $r9, $r8
+
+end:
+	buc end

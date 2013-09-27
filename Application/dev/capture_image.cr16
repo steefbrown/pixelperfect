@@ -1,0 +1,80 @@
+//  requests image and copies image to dst1 ($r0) and  dst2 ($r1)
+//  $r0 destination 1 for copying image
+//  $r1 destination 2 for copying image
+//
+capture_image:
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+	push $r6
+	push $r8
+	push $r9
+	push $r10
+
+
+	movi 0x800003, $r2 //mem-map-io for uart_rx_count
+	movi 0x800000, $r3 //mem-map-io for uart data
+	movi 0, $r9		   // line number
+
+do_line_loop:
+	movi 0, $r6
+	movi 0x0A, $r8
+req_loop:			//loop to send req signal for image (10 A's)
+	stor $r8, $r3
+	addi 1, $r6
+	cmpi 10, $r6
+	bne req_loop
+
+	//after bytes are sent, 
+	movi 0, $r10	// col number
+capture:
+		load $r4, $r2
+		cmpi 2, $r4   	//if the fifo has at least 2 items, grab them
+		bgt capture		//wait for more data to enter fifo
+
+
+		load $r5, $r3	//load first value from uart
+		slli 8, $r5		//set it in upper byte
+		load $r6, $r3	//load second value
+		or $r5, $r6		//combine the data
+		stor $r6, $r0	//stor data at offset 0 of memory
+		ori 0, $r0      // nop instruction to prevent write issues
+		stor $r6, $r1	//stor data at offset 1 of memory
+
+		addi 1, $r0		//increment address
+		addi 1, $r1		//increment address
+
+		addi 1, $r10
+		cmpi 320, $r10   // 640/2 since we load 2 bytes off uart at once
+		bne capture
+		movi 0, $r10
+		// here we have loaded the whole line
+
+// begin next line
+	addi 1, $r9
+	cmpi 480, $r9
+	bne do_line_loop
+
+
+// send one last acknowledge
+	movi 0, $r6
+	movi 0x0A, $r8
+req_loop_last:			//loop to send req signal for image (10 A's)
+	stor $r8, $r3
+	addi 1, $r6
+	cmpi 10, $r6
+	bne req_loop_last
+
+	// pop all saved registers
+	pop $r10
+	pop $r9
+	pop $r8
+	pop $r6
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+
+	ret
+//	END capture_image:

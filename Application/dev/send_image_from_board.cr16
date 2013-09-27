@@ -1,0 +1,153 @@
+
+
+// Send image from board to computer
+
+	movi 	0x177000, 	$bp		// starting address of top of stack
+	mov  	$bp,		$sp
+
+main:
+	// debounce
+	call f_spin
+
+
+	// print to LED
+	movi 0xAA, $r0
+	call f_write_led
+
+	// send notification to PC
+	movi 0x0C, $r0		// 0x0C is the signal to prepare to receive image
+	call f_send_10_bytes
+
+	call f_wait_for_ack
+
+	call f_send_image
+
+	// print to LED
+	movi 0xCC, $r0
+	call f_write_led
+
+	call f_exit
+
+
+f_wait_for_ack:
+	movi 0x800000, $r2 	// mem-map-io for uart data
+
+	// check that receive buffer has 4 items
+	movi 0x800003, $r3	// mem-map-io for uart rx buffer
+wait_for_ack_check_receive_buffer:
+	load $r5, $r3
+	cmpi 4, $r5
+	bne wait_for_ack_check_receive_buffer	
+
+	load $r3, $r2
+	ori 0, $r0
+	load $r3, $r2
+	ori 0, $r0
+	load $r3, $r2
+	ori 0, $r0
+	load $r3, $r2
+
+	mov $r3, $r0
+	call f_write_led
+
+	ret
+
+
+// 
+f_send_image:
+	push $r1
+	push $r0
+	movi 0x25800, $r1 	// address of offset image buffer
+send_image_frame_loop:
+	mov $r1, $r0		// pass address as parameter
+	call f_uart_send_line
+	addi 320, $r1
+	cmpi 0x4B000, $r1 	// address of end of image buffer
+	bne send_image_frame_loop
+	pop $r0
+	pop $r1
+	ret
+
+
+// assumes start read address is in $r0
+f_uart_send_line:
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+
+	mov $r0, $r2		// $r2 is read address
+	movi 0x800000, $r3 	// mem-map-io for uart data
+	movi 0, $r4			// line counter 0 <= $r4 <= 319
+uart_send_line_loop:
+	load $r5, $r2		// load pixel from memory
+	mov $r5, $r6
+	srli 8, $r6
+	stor $r6, $r3		// write high byte to uart
+	ori 0, $r0			// spacer
+	stor $r5, $r3		// write low byte to uart
+	addi 1, $r2
+	addi 1, $r4
+	cmpi 320, $r4
+	bne uart_send_line_loop
+
+	// check that send buffer is empty
+	movi 0x800002, $r3	// mem-map-io for uart tx buffer
+uart_send_line_check_send_buffer:
+	load $r5, $r3
+	cmpi 0, $r5
+	bne uart_send_line_check_send_buffer
+
+	mov $r2, $r0
+	call f_write_led
+
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	ret
+
+
+
+// end program
+f_exit:
+	buc f_exit
+
+
+// assumes byte to send is in $r0
+f_send_10_bytes:
+	push $r1
+	push $r3
+	movi 0, $r1
+	movi 0x800000, $r3 //mem-map-io for uart data
+send_10_bytes_loop:
+	stor $r0, $r3
+	addi 1, $r1
+	cmpi 10, $r1
+	bne send_10_bytes_loop
+	pop $r3
+	pop $r1
+	ret
+
+
+// assume value is in $r0
+f_write_led:
+	push $r9
+	movi 0x800004, $r9 // address of LEDs
+	stor $r0, $r9
+	pop $r9
+	ret
+
+// just wait for a while
+f_spin:
+	push $r0
+	movi 0, $r0
+spin_loop:
+	addi 1, $r0
+	cmpi 0x7FFFFF, $r0
+	bne spin_loop
+	pop $r0
+	ret
+
+
+

@@ -1,0 +1,453 @@
+//***BEGIN POP ART GREEN FUNCTION***//
+//**$r0 is the dark color (eg green)**//
+//**$r1 is the mid color (eg purple)**//
+//**$r2 is the light color (eg yellow)**//
+f_pop_art_green:
+	push $r3
+	push $r4
+	push $r5
+	push $r6
+	push $r7
+	movi 0, $r3 	//address counter
+	
+pop_art_loop:
+	load $r4, $r3    //r7 is the working copy
+	andi 0x9200, $r4
+	mov $r4, $r5	 //$r2 is working copy
+	//upper 4byte into 3bit
+	srli 8, $r5
+	cmpi 0x92, $r5 // yellow comparissons
+	beq light_ub
+	
+	cmpi 0x90, $r5 // purple comparissons
+	beq  mid_ub
+	cmpi 0x82, $r5
+	beq mid_ub
+	cmpi 0x12, $r5
+	beq mid_ub
+	cmpi 0x80, $r5
+	beq mid_ub
+	cmpi 0x02, $r5
+	beq mid_ub
+
+	mov $r0, $r6
+return_1:
+	slli 8, $r6
+	load $r4, $r3    //r7 is the working copy
+	andi 0x0092, $r4
+	mov $r4, $r5 //$r2 is working copy
+	cmpi 0x92, $r5 // yellow comparissons
+	beq light_lb
+	
+	cmpi 0x90, $r5 // purple comparissons
+	beq  mid_lb
+	cmpi 0x82, $r5
+	beq mid_lb
+	cmpi 0x12, $r5
+	beq mid_lb
+ 	cmpi 0x80, $r5
+	beq mid_lb
+	cmpi 0x02, $r5
+	beq mid_lb
+
+	mov $r0, $r7	
+
+return_2:
+	or $r6, $r7
+	stor $r7, $r3
+	addi 1, $r3
+	cmpi 153600, $r3
+	bne pop_art_loop
+	buc end_pop_art
+
+light_ub:
+	mov $r2, $r6
+	buc return_1
+mid_ub:
+	mov $r1, $r6
+	buc return_1
+light_lb:
+	mov $r2, $r7
+	buc return_2
+mid_lb:
+	mov $r1, $r7
+	buc return_2
+end_pop_art:
+	pop $r7
+	pop $r6
+	pop $r5
+	pop $r4
+	pop $r3
+	ret
+//***END POP ART GREEN FUNCTION***//
+
+
+//***BEGIN SATURATE COLOR***//
+//$r0 - address
+//$r1 is the color to saturate 	- 0x1C1C for green
+//								- 0x0303 for blue
+//								- 0xE0E0 for red
+f_saturate_color:
+	push $r7
+	push $r8
+	movi 0, $r8 	//address counter
+
+saturate_color_loop:
+	load $r7, $r0    //r7 is the working copy
+	or $r1, $r7
+	stor $r7, $r0
+	addi 1, $r8
+	addi 1, $r0
+	cmpi 153600, $r8
+	bne saturate_color_loop
+
+	pop $r8
+	pop $r7
+	ret
+//***END SATURATE COLOR***//
+
+//***MIRROR_RIGHT BEGIN
+//***NO ARGUMENTS
+f_mirror_right:		//load end of line address
+	push $r0
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	movi 0, $r0		//line offset, += 320 each line
+	movi 319, $r1	//mirrored pixel address
+	movi 0, $r2		//address of pixel to mirror
+inner_right_mirror:
+	load $r3, $r1	//load pixel to copy
+	mov $r3, $r4	//save another copy
+	andi 0xFF, $r3	//upper bytes become lower bytes, mask and swap
+	slli 8, $r3	//move lower to upper
+	andi 0xFF00, $r4 //mask upper
+	srli 8, $r4		//move upper to lower
+	or $r4, $r3	//combine upper and lower
+	stor $r3, $r2	//place pixel in complement address
+	addi 1, $r2		//move up a pixel
+	subi 1, $r1		//and down a pixel, keep mirror ordering
+	cmp $r2, $r1	//if the left half passed the right half, done
+	ble inner_right_mirror	//calculate next pixel on line
+	addi 160, $r2		//magic number
+	cmpi 153600, $r2		//if equals this number, done with image
+	ble end_mirror_right	
+	movi 0, $r1			//if not done with image, set up next end pixel reg and continue
+	add $r2, $r1
+	addi 319, $r1
+	buc inner_right_mirror
+
+end_mirror_right:
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//**END MIRROR RIGHT***//
+
+//***MIRROR_LEFT BEGIN
+//***NO ARGUMENTS
+f_mirror_left:		//load end of line address
+	push $r0
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	movi 0, $r0		//line offset, += 320 each line
+	movi 319, $r1	//mirrored pixel address
+	movi 0, $r2		//address of pixel to mirror
+	movi 0, $r0		//line offset, += 320 each line
+	movi 319, $r1	//mirrored pixel address
+	movi 0, $r2		//address of pixel to mirror
+inner_left_mirror:
+	load $r3, $r2	//load pixel to copy
+	mov $r3, $r4	//save another copy
+	andi 0xFF, $r3	//upper bytes become lower bytes, mask and swap
+	slli 8, $r3	//move lower to upper
+	andi 0xFF00, $r4 //mask upper
+	srli 8, $r4		//move upper to lower
+	or $r4, $r3	//combine upper and lower
+	stor $r3, $r1	//place pixel in complement address
+	addi 1, $r2		//move up a pixel
+	subi 1, $r1		//and down a pixel, keep mirror ordering
+	cmp $r2, $r1	//if the left half passed the right half, done
+	ble inner_left_mirror	//calculate next pixel on line
+	addi 160, $r2		//magic number
+	cmpi 153600, $r2		//if equals this number, done with image
+	ble end_mirror_left
+	movi 0, $r1			//if not done with image, set up next end pixel reg and continue
+	add $r2, $r1
+	addi 319, $r1
+	buc inner_left_mirror
+
+end_mirror_left:
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//***END MIRROR LEFT***//
+
+//***MIRROR_SWAP BEGIN
+//***NO ARGUMENTS
+f_mirror_swap:		//load end of line address
+	push $r0
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+	movi 0, $r0		//line offset, += 320 each line
+	movi 319, $r1	//mirrored pixel address
+	movi 0, $r2		//address of pixel to mirror
+inner_swap_mirror:
+	load $r3, $r2	//load pixel to copy
+	mov $r3, $r4	//save another copy
+	andi 0xFF, $r3	//upper bytes become lower bytes, mask and swap
+	slli 8, $r3	//move lower to upper
+	andi 0xFF00, $r4 //mask upper
+	srli 8, $r4		//move upper to lower
+	or $r4, $r3	//combine upper and lower
+
+	load $r5, $r1
+	mov $r5, $r4
+	stor $r3, $r1
+
+	andi 0xFF, $r5	//upper bytes become lower bytes, mask and swap
+	slli 8, $r5	//move lower to upper
+	andi 0xFF00, $r4 //mask upper
+	srli 8, $r4		//move upper to lower
+	or $r4, $r5	//combine upper and lower
+
+
+	stor $r5, $r2	//place pixel in complement address
+	mov $r3, $r4	//save another copy
+	andi 0xFF, $r3	//upper bytes become lower bytes, mask and swap
+	slli 8, $r3	//move lower to upper
+	andi 0xFF00, $r4 //mask upper
+	srli 8, $r4		//move upper to lower
+	or $r4, $r3	//combine upper and lower
+
+	addi 1, $r2		//move up a pixel
+	subi 1, $r1		//and down a pixel, keep mirror ordering
+	cmp $r2, $r1	//if the left half passed the right half, done
+	ble inner_swap_mirror	//calculate next pixel on line
+	addi 160, $r2		//magic number
+	cmpi 153600, $r2		//if equals this number, done with image
+	ble end_mirror_swap
+	movi 0, $r1			//if not done with image, set up next end pixel reg and continue
+	add $r2, $r1
+	addi 319, $r1
+	buc inner_swap_mirror
+
+end_mirror_swap:
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//**MIRROR SWAP END**//
+
+//***3_BIT_COLOR BEGIN***//
+//$r0 - address to apply to
+
+f_3_bit_color:
+	push $r1
+	push $r2
+	movi 0, $r2
+3_bit_loop:
+	load $r1, $r0    //r7 is the working copy
+		
+	andi 0x9292, $r1
+	stor $r1, $r0   //save pixel
+
+	addi 1, $r2
+	addi 1, $r0
+	cmpi 153600, $r2
+	bne 3_bit_loop
+
+
+	pop $r2
+	pop $r1
+	ret
+//**3 BIT COLOR END
+
+//***DARKEN BEGIN***///
+//NO ARGS
+f_darken:
+	push $r1
+	push $r2
+	movi 0, $r2 	//address counter
+
+darken_loop:
+	load $r1, $r0    //r1 is the working copy
+	andi 0x6D6D, $r1
+	stor $r1, $r0
+	addi 1, $r0
+	addi 1, $r2
+	cmpi 153600, $r2
+	bne darken_loop
+
+	pop $r2
+	pop $r1
+	ret
+//***DARKEN END***///
+
+//***BEGIN LIGHTEN***//
+f_lighten:
+	push $r1
+	push $r2
+	movi 0, $r2 	//address counter
+
+lighten_loop:
+	load $r1, $r0    //r1 is the working copy
+	ori 0x9292, $r1	 
+	stor $r1, $r0
+	addi 1, $r0
+	addi 1, $r2
+	cmpi 153600, $r2
+	bne lighten_loop
+
+	pop $r2
+	pop $r1
+	ret
+//***END LIGHTEN***//
+
+
+//***BEGIN PIXELATE***//
+
+f_pixelate:
+	push $r0
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+	push $r6
+	movi 0, $r0 //address counter
+	movi 0, $r4 //line counter
+
+pixelate_next_pixel:
+	mov $r0, $r1 //copy address for pixel block loop
+	load $r2, $r1 //load the pixel to copy
+	andi 0xFF00, $r2 //mask of 2nd pixel
+	mov $r2, $r3	//copy pixel
+	srli 8, $r2		//shift into place
+	or $r3, $r2		//copies to the other pixel within the address
+	movi 0, $r5	//outer loop counter
+	movi 0, $r6	//inner loop counter
+pixelate_inner:
+	stor $r2, $r1 	//place the pixel
+	addi 1, $r1 	//increment address
+	addi 1, $r5 	//increment line counter
+	cmpi 8, $r5
+	bne pixelate_inner
+pixelate_outer:
+	movi 0, $r5
+	addi 312, $r1 	//set up next block
+	addi 1, $r6	//increment lines done in block
+	cmpi 16, $r6 	//if 16 have been done, next pixel
+	beq pixelate_next_address
+	buc pixelate_inner
+
+pixelate_next_address:
+	movi 0, $r6
+	addi 8, $r4
+	cmpi 320, $r4
+	beq pixelate_next_line
+	addi 8, $r0
+	buc pixelate_next_pixel
+
+pixelate_next_line:
+	movi 0, $r4
+	addi 4816, $r0
+	cmpi 153600, $r0
+	bgt pixelate_next_pixel
+
+pixelate_end:
+	pop $r6
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//***END PIXELATE***//
+
+//***RGB_FILTER BEGIN***//
+//NO ARGS
+f_rgb_filter:
+	push $r0
+	push $r1
+	push $r2
+	movi 0, $r0 	//address counter
+	movi 0, $r2		//line counter
+
+rgb_filter_loop:
+	load $r1, $r0    //r7 is the working copy
+
+	cmpi 107, $r2
+	bge rgb_filter_red
+	cmpi 213, $r2
+	bge rgb_filter_green
+//blue
+	ori 0x0303, $r1
+	
+rgb_filter_return:
+	addi 1, $r2
+	cmpi 320, $r2
+	beq rgb_filter_new_line
+	stor $r1, $r0
+	addi 1, $r0
+	cmpi 153600, $r0
+	bne rgb_filter_loop
+	buc rgb_filter_end
+
+rgb_filter_red:
+	ori 0xE0E0, $r1
+	buc rgb_filter_return
+
+rgb_filter_green:
+	ori 0x1818, $r1
+	buc rgb_filter_return
+
+rgb_filter_new_line
+	movi -1, $r2
+	buc rgb_filter_return
+
+rgb_filter_end:
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//***RGB_FILTER_END***//
+
+//***INV COLOR BEGIN***//
+//$r0 - address to apply to
+
+f_inv:
+	push $r1
+	push $r2
+	movi 0, $r2
+inv_loop:
+	load $r1, $r0    //r7 is the working copy
+		
+	xori -1, $r1
+	stor $r1, $r0   //save pixel
+
+	addi 1, $r2
+	addi 1, $r0
+	cmpi 153600, $r2
+	bne inv_loop
+
+
+	pop $r2
+	pop $r1
+	ret
+//**INV COLOR END

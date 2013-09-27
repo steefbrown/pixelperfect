@@ -1,0 +1,10 @@
+
+	movi 0, $r1
+	movi 0xFFFF, $r2
+	lui  0xFFFF, $r2
+	
+loop:
+	load $r0, $r0
+	stor $r0, $r0
+
+	buc loop

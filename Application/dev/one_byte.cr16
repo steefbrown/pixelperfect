@@ -1,0 +1,58 @@
+main:
+
+	movi 0, $r1
+debounce:
+	addi 1, $r1
+	cmpi 255, $r1
+	bne debounce
+
+// write 2 on LEDs
+	movi 0xCFFFFF, $r10
+	movi 2, $r11
+	stor $r11, $r10
+
+	movi 0x800001, $r1  //mem map io for buttons
+
+button_press:
+	load $r2, $r1
+	cmpi 2, $r2		//assuming 2 is to take a picture (mem_map_io)
+	bne button_press
+
+	movi 0, $r6
+	movi 0x800000, $r7
+	movi 0x0A, $r8
+req_loop:			//loop to send req signal for image (10 A's)
+	stor $r8, $r7
+	addi 1, $r6
+	cmpi 10, $r6
+	bne req_loop
+
+
+// write 3 on LEDs
+	movi 3, $r11
+	stor $r11, $r10
+
+
+	movi 0x800003, $r2 //mem-map-io for uart rx_count
+	movi 0x800000, $r3 //mem-map-io for uart data
+capture:
+	load $r4, $r2
+	cmpi 0, $r4   	// check the amount of data in the fifo
+	bge capture		// wait for data
+
+
+	load $r4, $r3
+
+// if we load 0xFF, display 0xFF
+	movi	0xFF, $r12
+	cmp 	$r12, $r4
+	bne 	else
+	stor 	$r12, $r10
+	buc 	end
+else: // else display 0xAA
+	movi 	0xAA, $r12
+	stor 	$r12, $r10
+
+end:
+	buc end
+

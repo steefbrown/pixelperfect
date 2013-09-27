@@ -1,0 +1,31 @@
+
+
+// test push, pop
+
+
+// set up initial stack
+	movi 	0x177000, 	$bp		// starting address of top of stack
+	mov  	$bp,		$sp
+	subi 	8,			$sp
+
+main:
+	movi 0x007700BB, $r0
+	push $r0
+	pop $r1
+
+	cmp $r0, $r1		// check that we got the value back out
+	beq on_success
+	movi 0xBB, $r8
+	buc write
+
+on_success:
+	movi 0xAA, $r8
+	buc write
+
+write:
+	movi 0x800004, $r9 // address of LEDs
+	stor $r8, $r9
+	buc exit
+
+exit:
+	buc exit

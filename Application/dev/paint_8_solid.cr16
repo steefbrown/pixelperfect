@@ -1,0 +1,99 @@
+
+//
+// Cycles through 8 solid colors
+//
+
+paint:
+	movi	0,	$r0		// color
+	movi	0,	$r1 	// frame addr
+
+	movi	0, 	$r2 	// color index
+
+	movi 	0, 	$r3		// slow count
+
+// 8 colors:
+	movi 	0x8080, $r5
+	movi 	0xC0C0, $r6
+	movi 	0xE0E0, $r7
+	movi 	0x1010, $r8
+	movi 	0x1818, $r9
+	movi 	0x0C0C, $r10
+	movi 	0x0202, $r11
+	movi 	0x0101, $r12
+
+
+/////////////
+loop:
+	// write color to addr
+	stor	$r0,	$r1
+
+cont1:
+	// if frame addr >= 153600, reset
+	addi	1,	$r1
+	cmpi	153600,	$r1
+	beq		reset_addr
+
+	buc		loop
+/////////////
+
+reset_addr:
+	addi 	1, 		$r3
+	cmpi 	0x7FFFFF,	$r3	// slow him down joe!
+	bne 	reset_addr
+	movi 	0, 		$r3
+	movi	0,		$r1
+	buc		incr_color
+
+incr_color:
+	addi	1,	$r2
+	cmpi	8,	$r2
+	beq		reset_color
+	buc		choose_color
+reset_color:
+	movi	0, 	$r2
+	buc		choose_color
+
+// more like a sequence of if's than a switch...
+choose_color:
+	cmpi 	0, $r2
+	bne		color2
+	mov 	$r5, $r0
+	buc		loop
+color2:
+	cmpi 	1, $r2
+	bne		color3
+	mov 	$r6, $r0
+	buc		loop
+color3:
+	cmpi 	2, $r2
+	bne		color4
+	mov 	$r7, $r0
+	buc		loop
+color4:
+	cmpi 	3, $r2
+	bne		color5
+	mov 	$r8, $r0
+	buc		loop
+color5:
+	cmpi 	4, $r2
+	bne		color6
+	mov 	$r9, $r0
+	buc		loop
+color6:
+	cmpi 	5, $r2
+	bne		color7
+	mov 	$r10, $r0
+	buc		loop
+color7:
+	cmpi 	6, $r2
+	bne		color8
+	mov 	$r11, $r0
+	buc		loop
+color8:
+	mov 	$r12, $r0
+	buc		loop
+
+
+
+
+

@@ -1,0 +1,13 @@
+saturate_red:
+		movi 0, $r8 	//address counter
+
+loop:
+	load $r7, $r8    //r7 is the working copy
+	ori 0xE0E0, $r7
+	stor $r7, $r8
+	addi 1, $r8
+	cmpi 153600, $r8
+	bne loop
+
+end:
+	buc end

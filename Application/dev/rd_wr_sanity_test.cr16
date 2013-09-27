@@ -1,0 +1,28 @@
+// simple read write test rd_wr_sanity_test.cr16
+movi 0, $r1
+wait:
+	addi 1, $r1
+	cmpi 100000, $r1
+	bne wait
+main:
+	movi 0, $r1
+	movi 0xE0E0, $r2
+	movi 0x0303, $r6
+	stor $r2, $r1
+loop:
+	load $r3, $r1
+	cmp $r2, $r3
+//if
+	bne loop_fail
+	addi 1, $r1
+	stor $r3, $r1
+	cmpi 153600, $r1
+	bne loop
+	buc end
+loop_fail:
+	addi 1, $r1
+	stor $r6, $r1
+	cmpi 153600, $r1
+	bne loop_fail
+end:
+	buc end

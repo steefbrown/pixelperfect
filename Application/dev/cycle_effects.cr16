@@ -1,0 +1,143 @@
+//***DEBOUNCE***//
+	movi 0, $r0
+debounce:
+	addi 1, $r0
+	cmpi 10000, $r0
+	bne debounce
+
+	movi 	0x177000, 	$bp		// starting address of top of stack
+	mov  	$bp,		$sp
+
+	movi 0xAA, $r8
+	movi 0x800004, $r9
+	stor $r8, $r9
+main:
+
+	movi 0x800001, $r6
+wait_buttons_3:
+	load $r5, $r6
+	cmpi 1, $r5
+	bne wait_buttons_3
+
+	movi 153600, $r0
+	movi 0, $r1
+	call move_image
+
+	//call f_mirror_right
+
+	movi 0xCC, $r8
+	stor $r8, $r9
+wait_buttons_1:
+	load $r5, $r6
+	cmpi 2, $r5
+	bne wait_buttons_1
+
+	movi 153600, $r0
+	movi 0, $r1
+	call move_image
+
+	call f_3_bit_color
+	movi 0x88, $r8
+	stor $r8, $r9
+wait_buttons_2:
+	load $r5, $r6
+	cmpi 1, $r5
+	bne wait_buttons_2
+
+	movi 153600, $r0
+	movi 0, $r1
+	call move_image
+	movi 0xFF, $r8
+	stor $r8, $r9
+
+end_main:
+	buc end_main
+
+//	moves_image: moves image from src_offset ($r0) to dest_offset ($r1)
+//	$r0 src_offset
+//  $r1 dest_offset
+move_image:
+		push $r2        // save intermediate data register
+		push $r3        // save count reg
+		movi 0, $r3
+move_image_Loop:
+		load $r2, $r0	//load first value from memory
+		ori 0, $r0
+		stor $r2, $r1	//stor data image at offset r1 of memory
+
+		addi 1, $r0		//increment src address
+		addi 1, $r1     //increment dest address
+		addi 1, $r3     // increment count
+		
+		
+		cmpi 153600, $r3   // 640/2 * 480 = 153600 
+		bne move_image_Loop
+		
+		// here we have moved the whole image
+		pop $r3        // restore intermediate data register
+		pop $r2        // restore count reg
+	ret
+
+
+//***MIRROR_RIGHT BEGIN
+//***NO ARGUMENTS
+f_mirror_right:		//load end of line address
+	push $r0
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	movi 0, $r0		//line offset, += 320 each line
+	movi 319, $r1	//mirrored pixel address
+	movi 0, $r2		//address of pixel to mirror
+inner_right_mirror:
+	load $r3, $r1	//load pixel to copy
+	mov $r3, $r4	//save another copy
+	andi 0xFF, $r3	//upper bytes become lower bytes, mask and swap
+	slli 8, $r3	//move lower to upper
+	andi 0xFF00, $r4 //mask upper
+	srli 8, $r4		//move upper to lower
+	or $r4, $r3	//combine upper and lower
+	stor $r3, $r2	//place pixel in complement address
+	addi 1, $r2		//move up a pixel
+	subi 1, $r1		//and down a pixel, keep mirror ordering
+	cmp $r2, $r1	//if the left half passed the right half, done
+	ble inner_right_mirror	//calculate next pixel on line
+	addi 160, $r2		//magic number
+	cmpi 153600, $r2		//if equals this number, done with image
+	ble end_mirror_right	
+	movi 0, $r1			//if not done with image, set up next end pixel reg and continue
+	add $r2, $r1
+	addi 319, $r1
+	buc inner_right_mirror
+
+end_mirror_right:
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//**END MIRROR RIGHT***//
+//***3_BIT_COLOR BEGIN***//
+//***NO ARGS***///
+
+f_3_bit_color:
+	push $r0
+	push $r1
+	movi 0, $r0 	//address counter
+3_bit_loop:
+	load $r1, $r0    //r7 is the working copy
+		
+	andi 0x9292, $r1
+	stor $r1, $r0   //save pixel
+
+	addi 1, $r0
+	cmpi 153600, $r0
+	bne 3_bit_loop
+
+
+	pop $r1
+	pop $r0
+	ret
+//**3 BIT COLOR END

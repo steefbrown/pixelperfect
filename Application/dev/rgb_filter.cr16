@@ -1,0 +1,38 @@
+RGB_Switch_2:
+	movi 0, $r8 	//address counter
+	movi 0, $r9		//line counter
+
+loop:
+	load $r7, $r8    //r7 is the working copy
+
+	cmpi 107, $r9
+	bge red
+	cmpi 213, $r9
+	bge green
+//blue
+	ori 0x0303, $r7
+	
+return:
+	addi 1, $r9
+	cmpi 320, $r9
+	beq new_line
+	stor $r7, $r8
+	addi 1, $r8
+	cmpi 153600, $r8
+	bne loop
+	buc end
+
+red:
+	ori 0xE0E0, $r7
+	buc return
+
+green:
+	ori 0x1818, $r7
+	buc return
+
+new_line
+	movi -1, $r9
+	buc return
+
+end:
+	buc end

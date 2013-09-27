@@ -1,0 +1,31 @@
+// led_test1.cr16
+
+main:
+
+	movi 	0, $r3
+debounce:
+	addi 	1, $r3
+	cmpi 	0x0FFFFF, $r3
+	bne		debounce
+
+
+	movi 	0xC00000, $r3 	// addr to latch to leds
+	movi 	1, $r1			// value to display on leds
+
+	movi 	0, $r2		// slow count
+inc_count_loop:
+	stor 	$r1, $r3
+	addi 	1, $r2
+	cmpi 	1000, $r2
+	bne 	inc_count_loop
+
+	addi	1, $r1
+	cmpi 	0xFF, $r1
+	bne 	inc_count_loop
+
+
+
+end:
+	movi 	0xFF, $r1
+	stor 	$r1, $r3
+	buc end

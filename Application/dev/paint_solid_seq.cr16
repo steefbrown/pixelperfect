@@ -1,0 +1,41 @@
+
+//
+// Paints one full solid color at a time
+//
+
+paint:
+	movi	0,	$r0		// color
+	movi	0,	$r1 	// frame addr
+
+
+/////////////
+loop:
+	// write color to addr
+	stor	$r0,	$r1
+
+cont1:
+	// if frame addr >= 153600, reset
+	addi	1,	$r1
+	cmpi	153600,	$r1
+	beq		reset_addr
+
+	buc		loop
+/////////////
+
+reset_addr:
+	movi	0,		$r1
+	buc		incr_color
+
+incr_color:
+	addi	0x0101,	$r0
+	cmpi	0xFFFF,	$r0
+	beq		reset_color
+	buc		loop
+
+reset_color:
+	movi	0, 		$r0
+	buc		cont1
+
+
+
+

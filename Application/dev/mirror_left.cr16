@@ -1,0 +1,37 @@
+
+	movi 0, $r1
+wait_loop:
+	addi 1, $r1
+	cmpi 10000, $r1
+	bne wait_loop
+
+effect_mirror:		//load end of line address
+	movi 0, $r7		//line offset, += 320 each line
+	movi 319, $r8	//mirrored pixel address
+	movi 0, $r9		//address of pixel to mirror
+inner_mirror:
+	load $r10, $r9	//load pixel to copy
+	mov $r10, $r11	//save another copy
+	andi 0xFF, $r10	//upper bytes become lower bytes, mask and swap
+	slli 8, $r10	//move lower to upper
+	andi 0xFF00, $r11 //mask upper
+	srli 8, $r11		//move upper to lower
+	or $r11, $r10	//combine upper and lower
+	stor $r10, $r8	//place pixel in complement address
+	addi 1, $r9		//move up a pixel
+	subi 1, $r8		//and down a pixel, keep mirror ordering
+	cmp $r9, $r8	//if the left half passed the right half, done
+	ble inner_mirror	//calculate next pixel on line
+	addi 160, $r9		//magic number
+	cmpi 153600, $r9		//if equals this number, done with image
+	ble preend	
+	movi 0, $r8			//if not done with image, set up next end pixel reg and continue
+	add $r9, $r8
+	addi 319, $r8
+	buc inner_mirror
+preend:
+	movi 0x800004, $r3
+	movi 0xAA, $r4
+	stor $r4, $r3
+end:
+	buc end

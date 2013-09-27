@@ -1,0 +1,13 @@
+main:
+
+	movi 0, $r1
+	movi 0xE0E0, $r2
+
+loop:
+	stor $r2, $r1
+	addi 1, $r1
+	cmpi 153600, $r1
+	bne loop
+
+end:
+	buc end

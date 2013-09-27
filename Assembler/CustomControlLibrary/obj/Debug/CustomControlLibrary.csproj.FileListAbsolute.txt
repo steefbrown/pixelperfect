@@ -1,0 +1,15 @@
+C:\Users\Kevin\College\2012-2013\CS3710\Assembler\CustomControlLibrary\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Kevin\College\2012-2013\CS3710\Assembler\CustomControlLibrary\bin\Debug\CustomControlLibrary.dll
+C:\Users\Kevin\College\2012-2013\CS3710\Assembler\CustomControlLibrary\bin\Debug\CustomControlLibrary.pdb
+C:\Users\Kevin\College\2012-2013\CS3710\Assembler\CustomControlLibrary\obj\Debug\CustomControlLibrary.dll
+C:\Users\Kevin\College\2012-2013\CS3710\Assembler\CustomControlLibrary\obj\Debug\CustomControlLibrary.pdb
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Assembler\CustomControlLibrary\bin\Debug\CustomControlLibrary.dll
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Assembler\CustomControlLibrary\bin\Debug\CustomControlLibrary.pdb
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Assembler\CustomControlLibrary\obj\Debug\ResolveAssemblyReference.cache
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Assembler\CustomControlLibrary\obj\Debug\CustomControlLibrary.dll
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Assembler\CustomControlLibrary\obj\Debug\CustomControlLibrary.pdb
+C:\Users\Riv3r\Desktop\cs3710\Assembler\CustomControlLibrary\bin\Debug\CustomControlLibrary.dll
+C:\Users\Riv3r\Desktop\cs3710\Assembler\CustomControlLibrary\bin\Debug\CustomControlLibrary.pdb
+C:\Users\Riv3r\Desktop\cs3710\Assembler\CustomControlLibrary\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Riv3r\Desktop\cs3710\Assembler\CustomControlLibrary\obj\Debug\CustomControlLibrary.dll
+C:\Users\Riv3r\Desktop\cs3710\Assembler\CustomControlLibrary\obj\Debug\CustomControlLibrary.pdb

@@ -1,0 +1,56 @@
+
+
+// paint horizontal stripes of white and blue
+
+paint:
+	movi	0xFFFF,	$r0		// color (start white)
+	movi	0,		$r1 	// frame addr
+	movi	0,		$r2		// group (repeat color for multiple rows)
+	movi	0,		$r3		// col num 0 <= col <= 800
+
+/////////////
+loop:
+	// write color to addr
+	stor	$r0,	$r1
+
+	// increment column
+	addi	1, 		$r3
+	cmpi	400,	$r3		// 800/2 cols, since 2 pixels are writen each time
+	beq		reset_col	
+
+cont1:
+	// if frame addr >= 240000, reset
+	addi	1,		$r1
+	cmpi	240000,	$r1
+	beq		reset_frame
+
+	buc		loop
+/////////////
+
+
+change_color:
+	cmpi	0xFFFF	$r0		// if color is white...
+	beq		go_blue			// jump to go_blue
+	movi	0xFFFF	$r0		// else set color to white
+	buc		cont_change		// continue
+go_blue:
+	movi	0x1C1C	$r0		// set color to blue
+cont_change:
+	movi	0,		$r2 	// reset group count
+	buc		cont1
+
+reset_col:	
+	movi	0, 		$r3		// reset col count
+	addi	1, 		$r2		// increment group count
+	cmpi	4,		$r2		// comp to number of rows we want to repeat
+	beq		change_color
+	buc		cont1
+
+reset_frame:				// reset addr, group, col, and color
+	movi	0,		$r1
+	movi	0,		$r2
+	movi	0, 		$r3
+	movi	0xFFFF,	$r0
+	//buc		loop
+
+

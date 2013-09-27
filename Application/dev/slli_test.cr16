@@ -1,0 +1,10 @@
+
+
+// test slli
+
+main:
+	movi 0xFF, $r0
+	//movi 2, $r3
+	slli 2, $r0
+	movi 128, $r1
+	stor $r0, $r1

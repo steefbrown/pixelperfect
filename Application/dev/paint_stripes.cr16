@@ -1,0 +1,52 @@
+
+// paint stripes
+
+paint:
+	movi	0,	$r0		// color
+	movi	0,	$r1 	// frame addr
+	movi	0,	$r2		// group (repeat color for 8 cols)
+	movi	0,	$r3		// col num 0 <= col <= 800
+
+/////////////
+loop:
+	// write color to addr
+	stor	$r0,	$r1
+
+	// increment column
+	addi	1, 		$r3
+	cmpi	800,	$r3
+	beq		reset_col
+
+	// increment group count
+	addi	1, 		$r2
+	cmpi	4,		$r2
+	beq		increment_color
+
+cont1:
+	// if frame addr >= 240000, reset
+	addi	1,		$r1
+	cmpi	240000,	$r1
+	beq		reset_addr
+
+	buc		loop
+/////////////
+
+
+increment_color:
+	addi	0x6060,	$r0		// add 1 to both pixels
+	movi	0,		$r2 	// reset group count
+	buc		cont1
+
+reset_col:
+	movi	0, 		$r3
+	buc		reset_color
+
+reset_color:
+	movi	0, 		$r0
+	buc		cont1
+
+reset_addr:
+	movi	0,		$r1
+	buc		loop
+
+

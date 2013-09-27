@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="Z:/shared/Documents/College/2012-2013/CS3710/System/test_processor_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="test_processor" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="16" />
+   <wvobject fp_name="/test_processor/mem_read_enable" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_read_enable</obj_property>
+      <obj_property name="ObjectShortName">mem_read_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/mem_write_enable" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_write_enable</obj_property>
+      <obj_property name="ObjectShortName">mem_write_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/mem_write_data" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_write_data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_write_data[15:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/mem_write_addr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_write_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_write_addr[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/clr" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clr</obj_property>
+      <obj_property name="ObjectShortName">clr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/stall" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">stall</obj_property>
+      <obj_property name="ObjectShortName">stall</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/mem_read_data" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_read_data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_read_data[15:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/pc" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">pc[31:0]</obj_property>
+      <obj_property name="ObjectShortName">pc[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/inst" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">inst[31:0]</obj_property>
+      <obj_property name="ObjectShortName">inst[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/alu_aData" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_aData[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_aData[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/alu_bData" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_bData[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_bData[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/alu_result" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_result[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_result[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/imm" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">imm[23:0]</obj_property>
+      <obj_property name="ObjectShortName">imm[23:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/immExt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">immExt[31:0]</obj_property>
+      <obj_property name="ObjectShortName">immExt[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_processor/uut/sign_ext_inst/signbits" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">signbits[7:0]</obj_property>
+      <obj_property name="ObjectShortName">signbits[7:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+</wave_config>

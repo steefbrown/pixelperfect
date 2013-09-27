@@ -1,0 +1,51 @@
+
+
+
+// test functions
+
+	movi 	0x177000, 	$bp		// starting address of top of stack
+	mov  	$bp,		$sp
+//	subi 	8,			$sp
+
+//	movi 0xDD, $r1
+
+main:
+//	push $r1
+	call spin
+
+	movi 0xAA, $r0
+	call write_led
+
+	call spin
+
+	movi 0x7C, $r0
+	call write_led
+
+	call exit
+
+exit:
+	buc exit	
+
+// assume value is in $r0
+write_led:
+	push $r9
+	movi 0x800004, $r9 // address of LEDs
+	stor $r0, $r9
+	pop $r9
+	ret
+
+// check that we didn't fall through
+	movi 0x800004, $r9 // address of LEDs
+	movi 0xBB, $r0
+	stor $r0, $r9
+	buc exit
+
+spin:
+	push $r1
+	movi 0, $r1
+spin_loop:
+	addi 1, $r1
+	cmpi 0x7FFFFF, $r1
+	bne spin_loop
+	pop $r1
+	ret

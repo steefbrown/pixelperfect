@@ -1,0 +1,79 @@
+
+
+// paint vertical stripes of color A and color B
+
+paint:
+	movi	0xE0E0,	$r8		// color A
+	movi	0x1C1C,	$r9		// color B
+
+	mov 	$r8,	$r0		// r0 = current color
+	movi	0,		$r1 	// frame addr
+	movi	0,		$r2		// group (repeat color for multiple cols)
+	movi	0,		$r3		// col num 0 <= col <= cols
+
+/////////////
+main_loop:
+	//DEBUG
+	// if addr ends with 7'b111_1111, paint white
+//	mov 	$r1,	$r6
+//	andi	0x7F, 	$r6
+//	cmpi 	0x7F, 	$r6
+//	bne 	norm
+//	movi 	0xFFFF, $r6
+//	stor 	$r6, 	$r1
+//	buc 	cont2
+
+norm:
+	// write color to addr
+	stor	$r0,	$r1
+
+cont2:
+	// increment column
+	addi	1, 		$r3
+	cmpi	320,	$r3		// 640/2 cols, since 2 pixels are writen each time
+	beq		reset_col
+
+	// increment group count
+	addi	1, 		$r2
+	cmpi	32,		$r2		// comp to number of cols we want to repeat
+	beq		change_color
+
+cont1:
+	// if reached end of frame, reset
+	addi	1,		$r1
+	cmpi	153600,	$r1
+	beq		reset_frame
+
+	buc		main_loop
+/////////////
+
+
+change_color:
+	cmp 	$r8,	$r0		// if color is color A
+	beq		go_color_B		// jump to go_color_B
+	mov 	$r8 	$r0		// else set color to color A
+	buc		cont_change		// continue
+go_color_B:
+	mov 	$r9		$r0		// set color to color B
+cont_change:
+	movi	0,		$r2 	// reset group count
+	buc		cont1
+
+reset_col:					// reset group, col, and color
+	movi	0,		$r2
+	movi	0, 		$r3
+	mov 	$r8,	$r0
+	buc		cont1
+
+reset_frame:				// reset addr, group, col, and color
+	movi	0,		$r1
+	movi	0,		$r2
+	movi	0, 		$r3
+	mov 	$r8,	$r0
+	//buc		main_loop
+
+// write 2 on LEDs
+	movi 0xCFFFFF, $r10
+	movi 2, $r11
+	stor $r11, $r10
+

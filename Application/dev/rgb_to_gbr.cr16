@@ -1,0 +1,49 @@
+RGB_Switch_2:
+		movi 0, $r8 	//address counter
+
+loop:
+		load $r7, $r8    //r7 is the working copy
+		
+		mov $r7, $r10    //copy
+		srli 8, $r10  	 //grab upper bit
+		mov $r10, $r11   //copy first pixel
+
+		mov $r7, $r12    //reset pixels
+		andi 0xFF, $r12  //grab lower bit
+		mov $r12, $r13   //copy second pixel
+		
+		srli 3, $r10
+		andi 0x3, $r11
+		slli 6, $r11
+		or $r11, $r10
+
+		srli 3, $r12
+		andi 0x3, $r13
+		slli 6, $r13
+		or $r13, $r12
+
+		slli 8, $r10
+		or $r10, $r12
+
+		stor $r12, $r8   //save pixel
+
+		addi 1, $r8
+		cmpi 153600, $r8
+		bne loop
+
+end:
+	buc end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,45 @@
+
+
+
+main:
+	movi 0, $r0			// ram line counter (0-127)
+	movi 0, $r1			// address counter (0-153599)
+
+	movi 0xE0E0, $r5	// red
+	movi 0x1C1C, $r6	// green
+	movi 0x0303, $r7	// blue
+
+
+loop:
+	cmpi 0, $r0
+	bne not_first_pixel
+	stor $r5, $r1		// paint red on first pixel of ram line
+	buc increment
+not_first_pixel:
+	cmpi 127, $r0
+	bne not_last_pixel
+	stor $r5, $r1		// paint red on last pixel of ram line
+	buc increment
+not_last_pixel:
+	mov $r1, $r8		// copy address
+	andi 0x80, $r8		// are we a multiple of 256?
+	cmpi 0, $r8
+	bne paint_blue
+	stor $r6, $r1		// paint green
+	buc increment
+paint_blue:
+	stor $r7, $r1		// paint blue
+	buc increment
+increment:
+	addi 1, $r0
+	cmpi 128, $r0
+	bne continue
+	movi 0, $r0
+continue:
+	addi 1, $r1
+	cmpi 153600, $r1
+	bne loop
+
+
+end:
+	buc end

@@ -1,0 +1,37 @@
+
+// Test cr16 assembly file
+
+start:					// Where we start!
+	movi	0x04,	$r3		// r3 = 4
+	movi	0x00,	$r0		// r0 = 0
+	movi	0x64,	$r1		// r1 = 100
+
+loop:
+	addi	4,	$r3		// r3 += 4	
+	cmpi	40, 	$r3		// compare to 40
+	bne		loop
+	call	end
+	
+end:
+	movi	-1,	$r8
+	
+	
+//
+// Rules for assembly:
+//
+//	- Every token must be separated by whitespace
+//	- Instructions must have leading whitespace
+//	- The first operand may have a comma
+//
+//	- Labels must not have any leading whitespace
+//	- Labels must be on their own line (not with instructions)
+//	- Labels are case-sensitive ("start" != "Start")
+//
+//	- Registers are "$r0" through "$r15"
+//		
+//	- Immediates can come in the form of base16 by "0x" or base10 without "0x"
+//	- Immediates will get highest bits truncated if they are too big!
+//
+//	- Comments can go anywhere after tokens. No block comments (/* */)
+//
+//

@@ -1,0 +1,41 @@
+// uart_test1.cr16
+
+main:
+
+	movi 	0, $r3
+debounce:
+	addi 	1, $r3
+	cmpi 	0x0FFFFF, $r3
+	bne		debounce
+
+	movi 	2, $r9	// led value
+
+// wait for button 2 to get pressed...
+	movi 	0x800001, $r1  //mem map io for buttons
+	movi 	0xC0000F, $r3 	// addr to latch to leds
+button_press:
+	load 	$r2, $r1
+	stor 	$r9, $r3
+	cmpi 	2, $r2	
+	bne 	button_press
+
+	// change value on leds so we know we got here!
+	movi 	3, $r9
+	stor 	$r9, $r3
+
+
+// send 10 bytes of 0x0A to computer
+	movi 	0, $r6
+	movi 	0x800000, $r7	// uart address
+	movi 	0x0A, $r8		// uart data
+req_loop:				
+	stor 	$r8, $r7
+	addi 	1, $r6
+	cmpi 	10, $r6
+	bne 	req_loop
+
+
+	movi 	4, $r9
+end:
+	stor 	$r9, $r3
+	buc end

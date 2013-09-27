@@ -1,0 +1,18 @@
+// simple read write test rd_wr_test.cr16
+	movi 0, $r1
+wait:
+	addi 1, $r1
+	cmpi 1000, $r1
+	bne wait
+main:
+	movi 0, $r1
+	movi 0xE0E0, $r2
+	stor $r2, $r1
+loop:
+	load $r3, $r1
+	addi 1, $r1
+	stor $r3, $r1
+	cmpi 153600, $r1
+	bne loop
+end:
+	buc end 

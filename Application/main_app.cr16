@@ -1,0 +1,835 @@
+
+//
+// MAIN APP
+//
+
+
+
+main:
+
+	movi 	0x177000, 	$bp		// starting address of top of stack
+	mov  	$bp,		$sp
+
+	// debounce
+	call f_spin
+	call f_spin
+
+	call f_do_splash_screen
+
+	movi 0x0C, $r0
+	call f_write_led
+
+	call f_get_image
+
+	movi 0x0D, $r0
+	call f_write_led
+
+	call f_spin
+
+
+	call f_draw_effect_gui
+
+	call f_do_choose_effect
+
+	call f_do_show_last_screen
+
+	// print to LED
+	movi 0x0A, $r0
+	call f_write_led
+
+
+
+	call f_get_button
+
+	// let computer restart webcam
+	movi 0x0A, $r0
+	call send_10_bytes_loop
+
+	// start over!
+	buc main
+
+
+
+
+f_do_show_last_screen:
+	push $r1
+
+	movi 0, $r1 		// holds 0 for first option, 1 for second option
+
+	// first draw gui
+	mov $r1, $r0
+	call f_draw_last_screen_gui
+
+do_show_last_screen_loop:
+	call f_get_button			// returns button in $r0
+	cmpi 2, $r0 				// if select button pressed
+	bne do_show_last_screen_swap 
+	cmpi 0, $r1 				// and first option selected
+	bne do_show_last_screen_end
+	call f_send_image 			// send image to computer
+	buc do_show_last_screen_end
+do_show_last_screen_swap: 		// if not select button
+	xori 1, $r1 				// flip selected option
+	mov $r1, $r0 				
+	call f_draw_last_screen_gui 	// udpate gui based on selection
+	buc do_show_last_screen_loop 	// wait again
+
+do_show_last_screen_end:
+	pop $r1
+	ret
+
+
+// assumes $r0 holds 0 for first option, 1 for second option
+f_draw_last_screen_gui:
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+
+	movi 0, $r3
+	movi 138240, $r1 		// address into frame
+	cmpi 1, $r0
+	bne draw_last_screen_gui_op0
+	movi 0xA5000, $r2 		// address into offset
+	buc draw_last_screen_gui_color
+draw_last_screen_gui_op0:
+	movi 0xA1400, $r2 		// address into offset
+draw_last_screen_gui_color:
+	load $r4, $r2
+	ori 0, $r0
+	stor $r4, $r1
+
+	addi 1, $r1
+	addi 1, $r2
+	addi 1, $r3
+	cmpi 15360, $r3
+	bne draw_last_screen_gui_color
+
+	// slow it down jim!
+	call f_spin
+
+	pop $r4
+	pop $r3
+	pop $r2 
+	pop $r1
+	ret
+
+
+//	moves_image: moves image from src_offset ($r0) to dest_offset ($r1)
+//	$r0 src_offset
+//  $r1 dest_offset
+f_move_image:
+	push $r2        // save intermediate data register
+	push $r3        // save count reg
+
+	movi 0, $r3
+move_image_loop:
+	load $r2, $r0	//load first value from memory
+	ori 0, $r0 		// spacer
+	stor $r2, $r1	//stor data image at offset r1 of memory
+
+	addi 1, $r0		//increment src address
+	addi 1, $r1     //increment dest address
+	addi 1, $r3     // increment count
+	cmpi 153600, $r3   // 640/2 * 480 = 153600 
+	bgt move_image_loop
+
+	pop $r3        // restore intermediate data register
+	pop $r2        // restore count reg
+	ret
+
+
+// display the splash screen, returns when user wants to capture picture
+f_do_splash_screen:
+	call f_draw_spash_screen
+do_splash_screen_get_button
+	call f_get_button
+	cmpi 2, $r0
+	bne do_splash_screen_get_button
+	ret
+
+f_draw_spash_screen:
+	push $r0
+	push $r1
+	movi 0x4B000, $r0
+	movi 0, $r1
+	call f_move_image
+	pop $r1
+	pop $r0
+	ret
+
+f_draw_effect_gui:
+	ret
+	
+
+
+f_do_choose_effect:
+	call f_apply_filter
+	ret
+
+
+f_get_image:
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+	push $r6
+	push $r7
+	push $r9
+	push $r10
+
+	movi 153600, $r7 	// offset memory address
+	movi 0x0, $r1  		// memory address
+	movi 0x800003, $r2 	//mem-map-io for uart_rx_count
+	movi 0x800000, $r3 	//mem-map-io for uart data
+	movi 0, $r9			// line number
+
+get_image_do_line_loop:
+	movi 0x0A, $r0
+	call f_send_10_bytes
+
+	//after bytes are sent, 
+	movi 0, $r10		// col number
+get_image_capture:
+		load $r4, $r2
+		cmpi 2, $r4   			//if the fifo has at least 2 items, grab them
+		bgt get_image_capture	//wait for more data to enter fifo
+
+		load $r5, $r3	//load first value from uart
+		slli 8, $r5		//set it in upper byte
+		load $r6, $r3	//load second value
+		or $r5, $r6		//combine the data
+
+		stor $r6, $r1	//stor data in frame buffer
+		addi 1, $r1		//increment address
+		stor $r6, $r7 	//stor data in offset frame buffer
+		addi 1, $r7 	//increment offset address
+
+		addi 1, $r10
+		cmpi 320, $r10   // 640/2 since we load 2 bytes off uart at once
+		bne get_image_capture
+		movi 0, $r10
+		// here we have loaded the whole line
+
+// begin next line
+	addi 1, $r9
+	cmpi 480, $r9
+	bne get_image_do_line_loop
+
+// send one last acknowledge
+	movi 0x0A, $r0
+	call f_send_10_bytes
+
+	pop $r10
+	pop $r9
+	pop $r7
+	pop $r6
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	ret
+
+
+
+
+f_wait_for_ack:
+	push $r2
+	push $r3
+	push $r5
+	movi 0x800000, $r2 	// mem-map-io for uart data
+
+	// check that receive buffer has 4 items
+	movi 0x800003, $r3	// mem-map-io for uart rx buffer
+wait_for_ack_check_receive_buffer:
+	load $r5, $r3
+	cmpi 4, $r5
+	bne wait_for_ack_check_receive_buffer	
+
+	load $r3, $r2
+	ori 0, $r0
+	load $r3, $r2
+	ori 0, $r0
+	load $r3, $r2
+	ori 0, $r0
+	load $r3, $r2
+
+	mov $r3, $r0
+	call f_write_led
+
+	pop $r5
+	pop $r3
+	pop $r2
+	ret
+
+
+// 
+f_send_image:
+	push $r1
+
+	// send notification to PC
+	movi 0x0C, $r0		// 0x0C is the signal to prepare to receive image
+	call f_send_10_bytes
+
+	call f_wait_for_ack
+
+	movi 0x25800, $r1 	// address of offset image buffer
+send_image_frame_loop:
+	mov $r1, $r0		// pass address as parameter
+	call f_uart_send_line
+	addi 320, $r1
+	cmpi 0x4B000, $r1 	// address of end of image buffer
+	bne send_image_frame_loop
+
+	pop $r1
+	ret
+
+
+// assumes start read address is in $r0
+f_uart_send_line:
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+
+	mov $r0, $r2		// $r2 is read address
+	movi 0x800000, $r3 	// mem-map-io for uart data
+	movi 0, $r4			// line counter 0 <= $r4 <= 319
+uart_send_line_loop:
+	load $r5, $r2		// load pixel from memory
+	mov $r5, $r6
+	srli 8, $r6
+	stor $r6, $r3		// write high byte to uart
+	ori 0, $r0			// spacer
+	stor $r5, $r3		// write low byte to uart
+	addi 1, $r2
+	addi 1, $r4
+	cmpi 320, $r4
+	bne uart_send_line_loop
+
+	// check that send buffer is empty
+	movi 0x800002, $r3	// mem-map-io for uart tx buffer
+uart_send_line_check_send_buffer:
+	load $r5, $r3
+	cmpi 0, $r5
+	bne uart_send_line_check_send_buffer
+
+	mov $r2, $r0
+	call f_write_led
+
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	ret
+
+
+
+// end program
+f_exit:
+	buc f_exit
+
+
+// assumes byte to send is in $r0
+f_send_10_bytes:
+	push $r1
+	push $r3
+	movi 0, $r1
+	movi 0x800000, $r3 //mem-map-io for uart data
+send_10_bytes_loop:
+	stor $r0, $r3
+	addi 1, $r1
+	cmpi 10, $r1
+	bne send_10_bytes_loop
+	pop $r3
+	pop $r1
+	ret
+
+
+// assume value is in $r0
+f_write_led:
+	push $r9
+	movi 0x800004, $r9 // address of LEDs
+	stor $r0, $r9
+	pop $r9
+	ret
+
+// just wait for a while
+f_spin:
+	push $r0
+	movi 0, $r0
+spin_loop:
+	addi 1, $r0
+	cmpi 0x7FFFFF, $r0
+	bne spin_loop
+	pop $r0
+	ret
+
+
+// returns in $r0, 1=left, 2=center, 4=right
+f_get_button:
+	push $r1
+	movi 0x800001, $r1  //mem map io for buttons
+get_button_loop:
+	load $r0, $r1
+	cmpi 1, $r0			//assuming 2 is to take a picture (mem_map_io)
+	beq end_get_button
+	cmpi 2, $r0
+	beq end_get_button
+	cmpi 4, $r0
+	beq end_get_button
+	buc get_button_loop
+end_get_button
+	pop $r1
+	ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+f_apply_filter:
+	push $r0
+	push $r1
+	push $r2
+	push $r3 
+	push $r4
+	push $r5
+	push $r6
+	push $r7
+	push $r8
+	push $r9
+	movi 0, $r8	
+	movi 0x800004, $r6
+	movi 0, $r7
+cycle_selection:
+	cmpi 1, $r7
+	beq exit_effect
+	call f_get_button // wait for button selection
+	
+	cmpi 4, $r0		// button right was pressed
+	beq right
+	cmpi 1, $r0
+	beq left
+	cmpi 2, $r0
+	beq select
+						// shouldnt occur
+	buc cycle_selection
+right:					// updates index for right button
+	addi 1, $r8
+	buc check 
+left:					// updates index for left button
+	subi 1, $r8
+	buc check1
+check:					// checks for edge cases
+	cmpi 13, $r8
+	bne apply_select
+	movi 0, $r8
+	buc apply_select
+check1:					// check for second edge case
+	cmpi -1, $r8
+	bne apply_select
+	movi 12, $r8
+	buc apply_select
+
+select:				// should apply filter to offset and return
+	//buc cycle_selection
+	movi 153600, $r0
+	movi 153600, $r3
+	movi 1, $r7
+	buc final_ret 
+
+apply_select:		// updates forground image with filter
+	stor $r8, $r6
+	movi 153600, $r0  // move image params
+	movi 0, $r1		  // dest
+	call f_move_image
+	movi 0, $r0
+final_ret:
+	cmpi 0, $r8
+	beq cycle_selection	
+	cmpi 1, $r8
+	beq e_1
+	cmpi 2, $r8
+	beq e_2
+	cmpi 3, $r8
+	beq e_3
+	cmpi 4, $r8
+	beq e_4
+	cmpi 5, $r8
+	beq e_5
+	cmpi 6, $r8
+	beq e_6
+	cmpi 7, $r8
+	beq e_7
+	cmpi 8, $r8
+	beq e_8
+	cmpi 9, $r8
+	beq e_9
+	cmpi 10, $r8
+	beq e_10
+	cmpi 11, $r8
+	beq e_11
+	cmpi 12, $r8
+	beq e_12
+
+e_1:
+	call f_3_bit_color
+	buc cycle_selection
+e_2:
+	call f_inv
+	buc cycle_selection
+e_3:
+	call f_lighten
+	buc cycle_selection
+e_4:
+	call f_darken
+	buc cycle_selection
+e_5:
+	movi 0xE002, $r1
+	call f_saturate_color
+	buc cycle_selection
+e_6:
+	movi 0x1C02, $r1
+	call f_saturate_color
+	buc cycle_selection
+e_7:
+	movi 0x0303, $r1
+	call f_saturate_color
+	buc cycle_selection
+e_8:
+	mov $r0, $r3
+	movi 0x14, $r0
+	movi 0xF7, $r1
+	movi 0xFE, $r2
+	call f_pop_art
+	buc cycle_selection
+e_9:
+	mov $r0, $r3
+	movi 0xA0, $r0
+	movi 0x9B, $r1
+	movi 0xFC, $r2
+	call f_pop_art
+	buc cycle_selection
+e_10:
+	mov $r0, $r3
+	movi 0x42, $r0
+	movi 0xF2, $r1
+	movi 0xFE, $r2
+	call f_pop_art
+	buc cycle_selection
+e_11:
+	call f_pixelate
+	buc cycle_selection
+e_12:
+	movi 0x4A4a, $r1
+	call f_saturate_color
+	buc cycle_selection
+
+exit_effect:
+	pop $r9
+	pop $r8
+	pop $r7
+	pop $r6
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	pop $r0
+	ret
+//***BEGIN POP ART GREEN FUNCTION***//
+//**$r0 is the dark color (eg green)**//
+//**$r1 is the mid color (eg purple)**//
+//**$r2 is the light color (eg yellow)**//
+//**$r3 is the destination address    **//
+f_pop_art:
+	push $r4
+	push $r5
+	push $r6
+	push $r7
+	push $r8
+	movi 0, $r8 	//address counter
+	
+pop_art_loop:
+	load $r4, $r8    //r7 is the working copy
+	andi 0x9200, $r4
+	mov $r4, $r5	 //$r2 is working copy
+	//upper 4byte into 3bit
+	srli 8, $r5
+	cmpi 0x92, $r5 // yellow comparissons
+	beq light_ub
+	
+	cmpi 0x90, $r5 // purple comparissons
+	beq  mid_ub
+	cmpi 0x82, $r5
+	beq mid_ub
+	cmpi 0x12, $r5
+	beq mid_ub
+	cmpi 0x80, $r5
+	beq mid_ub
+	cmpi 0x02, $r5
+	beq mid_ub
+
+	mov $r0, $r6
+return_1:
+	slli 8, $r6
+	load $r4, $r3    //r7 is the working copy
+	andi 0x0092, $r4
+	mov $r4, $r5 //$r2 is working copy
+	cmpi 0x92, $r5 // yellow comparissons
+	beq light_lb
+	
+	cmpi 0x90, $r5 // purple comparissons
+	beq  mid_lb
+	cmpi 0x82, $r5
+	beq mid_lb
+	cmpi 0x12, $r5
+	beq mid_lb
+ 	cmpi 0x80, $r5
+	beq mid_lb
+	cmpi 0x02, $r5
+	beq mid_lb
+
+	mov $r0, $r7	
+
+return_2:
+	or $r6, $r7
+	stor $r7, $r3
+	addi 1, $r3
+	addi 1, $r8
+	cmpi 153600, $r8
+	bne pop_art_loop
+	buc end_pop_art
+
+light_ub:
+	mov $r2, $r6
+	buc return_1
+mid_ub:
+	mov $r1, $r6
+	buc return_1
+light_lb:
+	mov $r2, $r7
+	buc return_2
+mid_lb:
+	mov $r1, $r7
+	buc return_2
+end_pop_art:
+	pop $r8
+	pop $r7
+	pop $r6
+	pop $r5
+	pop $r4
+	ret
+//***END POP ART GREEN FUNCTION***//
+
+
+
+//***BEGIN SATURATE COLOR***//
+//$r0 - address
+//$r1 is the color to saturate 	- 0x1C1C for green
+//								- 0x0303 for blue
+//								- 0xE0E0 for red
+f_saturate_color:
+	push $r7
+	push $r8
+	movi 0, $r8 	//address counter
+
+saturate_color_loop:
+	load $r7, $r0    //r7 is the working copy
+	or $r1, $r7
+	stor $r7, $r0
+	addi 1, $r8
+	addi 1, $r0
+	cmpi 153600, $r8
+	bne saturate_color_loop
+
+	pop $r8
+	pop $r7
+	ret
+//***END SATURATE COLOR***//
+
+//***3_BIT_COLOR BEGIN***//
+//$r0 - address to apply to
+
+f_3_bit_color:
+	push $r1
+	push $r2
+	movi 0, $r2
+3_bit_loop:
+	load $r1, $r0    //r7 is the working copy
+		
+	andi 0x9292, $r1
+	stor $r1, $r0   //save pixel
+
+	addi 1, $r2
+	addi 1, $r0
+	cmpi 153600, $r2
+	bne 3_bit_loop
+
+
+	pop $r2
+	pop $r1
+	ret
+//**3 BIT COLOR END
+//***DARKEN BEGIN***///
+//NO ARGS
+f_darken:
+	push $r1
+	push $r2
+	movi 0, $r2 	//address counter
+
+darken_loop:
+	load $r1, $r0    //r1 is the working copy
+	andi 0x6D6D, $r1
+	stor $r1, $r0
+	addi 1, $r0
+	addi 1, $r2
+	cmpi 153600, $r2
+	bne darken_loop
+
+	pop $r2
+	pop $r1
+	ret
+//***DARKEN END***///
+//***BEGIN LIGHTEN***//
+f_lighten:
+	push $r1
+	push $r2
+	movi 0, $r2 	//address counter
+
+lighten_loop:
+	load $r1, $r0    //r1 is the working copy
+	ori 0x9292, $r1	 
+	stor $r1, $r0
+	addi 1, $r0
+	addi 1, $r2
+	cmpi 153600, $r2
+	bne lighten_loop
+
+	pop $r2
+	pop $r1
+	ret
+//***END LIGHTEN***//
+
+
+
+//***INV COLOR BEGIN***//
+//$r0 - address to apply to
+
+f_inv:
+	push $r1
+	push $r2
+	movi 0, $r2
+inv_loop:
+	load $r1, $r0    //r7 is the working copy
+		
+	xori -1, $r1
+	stor $r1, $r0   //save pixel
+
+	addi 1, $r2
+	addi 1, $r0
+	cmpi 153600, $r2
+	bne inv_loop
+
+
+	pop $r2
+	pop $r1
+	ret
+//**INV COLOR END
+
+
+//pixelate a 16x16 block of pixels
+f_pixelate:
+	push $r1
+	push $r2
+	push $r3
+	push $r4
+	push $r5
+	push $r6
+	push $r9
+	movi 0, $r6 //address counter
+	movi 0, $r9 //line counter
+
+pixelate_next_pixel:
+	mov $r0, $r1 //copy address for pixel block loop
+	addi 2564, $r1
+	load $r2, $r1 //load the pixel to copy
+	subi 2564, $r1
+	andi 0xFF00, $r2 //mask of 2nd pixel
+	mov $r2, $r3	//copy pixel
+	srli 8, $r2		//shift into place
+	or $r3, $r2		//copies to the other pixel within the address
+	movi 0, $r4	//outer loop counter
+	movi 0, $r5	//inner loop counter
+pixelate_inner:
+	stor $r2, $r1 	//place the pixel
+	addi 1, $r1 	//increment address
+	addi 1, $r4 	//increment line counter
+	cmpi 8, $r4
+	bne pixelate_inner
+pixelate_outer:
+	movi 0, $r4
+	addi 312, $r1 	//set up next block
+	addi 1, $r5	//increment lines done in block
+	cmpi 16, $r5 	//if 16 have been done, next pixel
+	beq pixelate_next_address
+	buc pixelate_inner
+
+pixelate_next_address:
+	movi 0, $r5
+	addi 8, $r9
+	cmpi 320, $r9
+	beq pixelate_next_line
+	addi 8, $r0
+	addi 8, $r6
+	buc pixelate_next_pixel
+
+pixelate_next_line:
+	movi 0, $r9
+	addi 4816, $r0
+	addi 4816, $r6
+	cmpi 153600, $r6
+	bgt pixelate_next_pixel
+
+pixelate_end:
+	pop $r9
+	pop $r6
+	pop $r5
+	pop $r4
+	pop $r3
+	pop $r2
+	pop $r1
+	ret
+	
+
+
+
+
+

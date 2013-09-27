@@ -1,0 +1,18 @@
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\bin\Debug\ImageConverter.exe
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\bin\Debug\ImageConverter.pdb
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.Form1.resources
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.Properties.Resources.resources
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.exe
+C:\Users\Kevin\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.pdb
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.exe
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.pdb
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\bin\Debug\ImageConverter.exe
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\bin\Debug\ImageConverter.pdb
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ResolveAssemblyReference.cache
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.Form1.resources
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\ImageConverter.Properties.Resources.resources
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\GenerateResource.read.1.tlog
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\ImageConverter\ImageConverter\obj\x86\Debug\GenerateResource.write.1.tlog

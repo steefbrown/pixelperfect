@@ -1,0 +1,25 @@
+//	moves_image: moves image from src_offset ($r0) to dest_offset ($r1)
+//	$r0 src_offset
+//  $r1 dest_offset
+move_image:
+		push $r2        // save intermediate data register
+		push $r3        // save count reg
+		movi 0, $r3
+		
+move_image_Loop:
+		load $r2, $r0	//load first value from memory
+		ori 0, $r0
+		stor $r2, $r1	//stor data image at offset r1 of memory
+
+		addi 1, $r0		//increment src address
+		addi 1, $r1     //increment dest address
+		addi 1, $r3     // increment count
+		
+		
+		cmpi 153600, $r3   // 640/2 * 480 = 153600 
+		bgt move_image_Loop
+		
+		// here we have moved the whole image
+		pop $r3        // restore intermediate data register
+		pop $r2        // restore count reg
+	ret

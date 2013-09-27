@@ -1,0 +1,118 @@
+
+// get_pic_repeat
+
+main:
+	movi 0, $r1
+debounce:
+	addi 1, $r1
+	cmpi 255, $r1
+	bne debounce
+
+	movi 0x800004, $r13 // address of LEDs
+	movi 0x800001, $r14  //mem map io for buttons
+
+
+button_press:
+	load $r2, $r14
+	cmpi 2, $r2		//assuming 2 is to take a picture (mem_map_io)
+	bne button_press
+
+
+	movi 0x0, $r1  		// memory address
+	movi 0x800003, $r2 //mem-map-io for uart_rx_count
+	movi 0x800000, $r3 //mem-map-io for uart data
+	movi 0, $r9		// line number
+
+// write on LEDs
+	movi 0xAA, $r11
+	stor $r11, $r13
+
+do_line_loop:
+	movi 0, $r6
+	movi 0x0A, $r8
+req_loop:			//loop to send req signal for image (10 A's)
+	stor $r8, $r3
+	addi 1, $r6
+	cmpi 10, $r6
+	bne req_loop
+
+	//after bytes are sent, 
+	movi 0, $r10	// col number
+capture:
+		load $r4, $r2
+		cmpi 2, $r4   	//if the fifo has at least 2 items, grab them
+		bgt capture		//wait for more data to enter fifo
+
+		// write fifo number on leds
+		//stor $r4, $r13
+
+		load $r5, $r3	//load first value from uart
+		slli 8, $r5		//set it in upper byte
+		load $r6, $r3	//load second value
+		or $r5, $r6		//combine the data
+		stor $r6, $r1	//stor data at offset 0 of memory
+
+		addi 1, $r1		//increment address
+
+		addi 1, $r10
+		cmpi 320, $r10   // 640/2 since we load 2 bytes off uart at once
+		bne capture
+		movi 0, $r10
+		// here we have loaded the whole line
+
+// begin next line
+	addi 1, $r9
+	cmpi 480, $r9
+	bne do_line_loop
+
+
+// send one last acknowledge
+	movi 0, $r6
+	movi 0x0A, $r8
+req_loop_last:			//loop to send req signal for image (10 A's)
+	stor $r8, $r3
+	addi 1, $r6
+	cmpi 10, $r6
+	bne req_loop_last
+
+
+// write on LEDs
+	movi 0xDD, $r11
+	stor $r11, $r13
+
+
+wait_for_input:
+	load $r2, $r14
+	cmpi 4, $r2		// 4 is right button, take another picture
+	bne try_1
+	buc take_another
+try_1:
+	cmpi 1, $r2		// 1 is left button, apply effect
+	bne wait_for_input
+	buc apply_effect_inv
+
+
+apply_effect_inv:
+	movi 0, $r1
+effect_inv_loop:
+	load $r2, $r1
+	xori 0xFFFF, $r2
+	stor $r2, $r1
+	addi 1 $r1
+	cmpi 153600, $r1
+	bne effect_inv_loop
+	buc wait_for_input
+
+
+// send signal to reset webcam
+take_another:
+	movi 0, $r6
+	movi 0x0A, $r8
+req_loop_restart:			//loop to send req signal for image (10 A's)
+	stor $r8, $r3
+	addi 1, $r6
+	cmpi 10, $r6
+	bne req_loop_restart
+
+	buc button_press
+

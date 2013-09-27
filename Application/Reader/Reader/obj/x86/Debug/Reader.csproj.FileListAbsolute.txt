@@ -1,0 +1,18 @@
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\bin\Debug\Reader.exe
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\bin\Debug\Reader.pdb
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\ResolveAssemblyReference.cache
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\Reader.Form1.resources
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\Reader.Properties.Resources.resources
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\GenerateResource.read.1.tlog
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\GenerateResource.write.1.tlog
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\Reader.exe
+\\vmware-host\Shared Folders\shared\Documents\College\2012-2013\CS3710\Reader\Reader\obj\x86\Debug\Reader.pdb
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\Reader.exe
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\Reader.pdb
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\bin\Debug\Reader.exe
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\bin\Debug\Reader.pdb
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\Reader.Form1.resources
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\Reader.Properties.Resources.resources
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\Riv3r\Desktop\cs3710\Reader\Reader\obj\x86\Debug\GenerateResource.write.1.tlog

@@ -1,0 +1,56 @@
+
+
+// test writing before/at ram line start
+
+
+paint:
+
+
+	
+	movi	0x8080,	$r9		// red
+	movi 	127, 	$r10
+	stor 	$r9, 	$r10 	// store into 127
+
+
+	movi	0x0303,	$r9		// blue
+	movi 	128, 	$r10
+	stor 	$r9, 	$r10 	// store into 128
+
+
+	load 	$r0, 	$r10
+
+
+	//movi	0xE0E0,	$r0		
+
+	movi	0,		$r1 	// frame addr
+
+
+////////////
+main_loop:
+	// if addr not 127 or 128, paint red
+	//cmpi 	127, 	$r1	
+	//beq 	cont1
+	//cmpi 	128, 	$r1
+	//beq 	cont1
+
+	stor	$r0,	$r1
+
+cont1:
+	// if reached end of frame, reset
+	addi	1,		$r1
+	cmpi	153600,	$r1
+	beq		reset_frame
+
+	buc		main_loop
+/////////////
+
+
+reset_frame:				// reset addr, group, col, and color
+	movi	0,		$r1
+	movi	0,		$r2
+	movi	0, 		$r3
+	mov 	$r8,	$r0
+	//buc		main_loop
+
+
+

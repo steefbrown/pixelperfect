@@ -1,0 +1,10 @@
+main:
+	movi 10 , $r2
+	movi 0 , $r1
+loop:
+	addi 1, $r1
+	cmp $r1, $r2
+	bgt loop
+
+exit:
+	buc exit

@@ -1,0 +1,33 @@
+//16 pixels become 1 pixel (merging 4x4 pixel block)
+pixelate:
+	movi 0, $r1
+line:
+	
+	movi 0, $r8
+	load $r0, $r1	//get pixel to copy
+	movi $r1, $r2	//set up 2nd row ptr
+	addi 640, $r2
+	mov $r2, $r3	//set up 3rd row ptr
+	addi 640, $r3
+	mov $r3, $r4	//set up 4th row ptr
+	addi 640, $r4
+	movi 0, $r10
+loop_4:
+	stor $r0, $r1
+	addi 1, $r1
+	stor $r0, $r2
+	addi 1, $r2
+	stor $r0, $r3
+	addi 1, $r3
+	stor $r0, $r4
+	addi 1, $r4
+	addi 1, $r10
+	cmpi 4, $r10
+	bne loop_4
+
+	addi 4, $r8
+	cmpi 640, $r8	//if not at the end of line, continue line
+	bne line
+	addi 640, $r1	//skip every other line
+	cmpi 307200, $r1	//if still within the frame, continue
+	bgt line

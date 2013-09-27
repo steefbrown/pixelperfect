@@ -1,0 +1,49 @@
+//pixelate a 16x16 block of pixels
+
+pixelate:
+	movi 0, $r0 //address counter
+	movi 0, $r9 //line counter
+
+next_pixel:
+	mov $r0, $r1 //copy address for pixel block loop
+	load $r2, $r1 //load the pixel to copy
+	andi 0xFF00, $r2 //mask of 2nd pixel
+	mov $r2, $r3	//copy pixel
+	srli 8, $r2		//shift into place
+	or $r3, $r2		//copies to the other pixel within the address
+	movi 0, $r10	//outer loop counter
+	movi 0, $r11	//inner loop counter
+inner:
+	stor $r2, $r1 	//place the pixel
+	addi 1, $r1 	//increment address
+	addi 1, $r10 	//increment line counter
+	cmpi 8, $r10
+	bne inner
+outer:
+	movi 0, $r10
+	addi 312, $r1 	//set up next block
+	addi 1, $r11	//increment lines done in block
+	cmpi 16, $r11 	//if 16 have been done, next pixel
+	beq next_address
+	buc inner
+
+next_address:
+	movi 0, $r11
+	addi 8, $r9
+	cmpi 320, $r9
+	beq next_line
+	addi 8, $r0
+	buc next_pixel
+
+next_line:
+	movi 0, $r9
+	addi 4816, $r0
+	cmpi 153600, $r0
+	bgt next_pixel
+
+	movi 0xAA, $r12
+	movi 0x800004, $r13
+	stor $r12, $r13
+end:
+	buc end
+	
